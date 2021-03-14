@@ -39,26 +39,23 @@ impl<C> StageManager<C> {
     pub fn run(&self, context: C) -> C {
         let mut context = context;
         for s in &self.file.stages {
-            let stages = s
-                .into_iter()
+            s.into_iter()
                 .map(|(k, v)| {
                     let f = &self.deserialize_map[k];
                     let mut s = f(v.clone());
                     s.setup();
                     s
                 })
-                .collect::<Vec<_>>();
-
-            stages.iter().for_each(|s| {
-                s.run(&mut context);
-            });
+                .for_each(|s| {
+                    s.run(&mut context);
+                });
         }
         context
     }
 
     pub fn register_named<'a, S>(&mut self, name: &str) -> &mut Self
     where
-        S: 'static + Stage<C = C> + StageName + Deserialize<'a>,
+        S: 'static + Stage<C = C> + Deserialize<'a>,
     {
         self.deserialize_map.insert(
             name.to_string(),
