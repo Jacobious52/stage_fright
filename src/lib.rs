@@ -1,5 +1,5 @@
 use serde::{Deserialize, Deserializer};
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt::Debug};
 
 pub trait Stage {
     type C;
@@ -25,13 +25,19 @@ struct StageArgs<V> {
 
 type FnDeserializeStage<C, V> = Box<dyn Fn(V) -> Box<dyn Stage<C = C>>>;
 
-#[derive(Debug, Deserialize)]
+#[derive(Deserialize)]
 pub struct StageManager<C, V> {
     #[serde(flatten)]
     file: StageFile<V>,
 
     #[serde(skip)]
     deserialize_map: HashMap<String, FnDeserializeStage<C, V>>,
+}
+
+impl<C, V> Debug for StageManager<C, V> where V: Debug {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "StateManager{{file: {:?}, deserialize_map: {:?}}}", self.file, self.deserialize_map.keys())
+    }
 }
 
 impl<'de, C, V> StageManager<C, V>
@@ -81,7 +87,7 @@ where
 
 impl<'de, C, V> Stage for StageManager<C, V>
 where
-    V: Deserialize<'de> + Deserializer<'de> + Clone,
+    V: Deserialize<'de> + Deserializer<'de> + Clone
 {
     type C = C;
 
