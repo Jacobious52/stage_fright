@@ -25,7 +25,7 @@ struct StageArgs<V> {
 
 type FnDeserializeStage<C, V> = Box<dyn Fn(V) -> Box<dyn Stage<C = C>>>;
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct StageManager<C, V> {
     #[serde(flatten)]
     file: StageFile<V>,
